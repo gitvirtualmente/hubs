@@ -54,8 +54,28 @@ export function RoomLayout({
           right={toolbarRight}
         />
       )}
+      {isSplitScreen && (
+        <div className={classNames(styles.main, styles.viewport, styles.videoStreamingOverlay, styles.videoStreamingBox)}>
+          <iframe
+            className={classNames(styles.videoStreamingFrame)}
+            src="https://www.youtube.com/embed/C1DDT16ewdE"
+            title="Eventos virtuales 3D - Rhy Marketing"
+            // frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen="true"
+          ></iframe>
+        </div>
+      )}
+
+      <div className={classNames(styles.main, styles.peopleCount)}>20/100</div>
+
       <div
-        className={classNames(styles.main, styles.viewport, { [styles.streaming]: streaming , [styles.viewportSplit]: isSplitScreen}, viewportClassName)}
+        className={classNames(
+          styles.main,
+          styles.viewport,
+          { [styles.streaming]: streaming, [styles.viewportSplit]: isSplitScreen },
+          viewportClassName
+        )}
         ref={viewportRef}
       >
         {viewport}

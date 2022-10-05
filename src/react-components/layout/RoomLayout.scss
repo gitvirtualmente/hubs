@@ -16,7 +16,7 @@
   position: relative;
   pointer-events: none;
 }
-
+// this is the show the button
 :local(.videoStreamingOverlay) {
   grid-column: main;
   grid-row: viewport;
@@ -25,7 +25,6 @@
   justify-content: center;
   align-items: center;
   z-index: 10;
-
 }
 
 :local(.isVideoStreaming) {
@@ -34,12 +33,11 @@
   left: 30px;
   background: red;
 
-  height:40px;
-  width:50px;
-  button{
+  height: 40px;
+  width: 50px;
+  button {
     border-radius: 15px;
-    padding:4px;
-
+    padding: 4px;
   }
 }
 
@@ -82,7 +80,50 @@
     pointer-events: auto;
   }
 }
+:local(.viewport-split) {
+  position: relative;
+  grid-row-start: viewport;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60%;
+  width: 100%;
+  & > * {
+    pointer-events: auto;
+  }
+}
 
+:local(.people-count) {
+  height: 20px;
+  position: absolute;
+  bottom: 120px;
+  margin: auto;
+  left: 50;
+  width: 80px;
+  background: white;
+  border: 2px solid red;
+  border-radius: 12px;
+  color: black;
+  display: flex;
+  justify-content: center;
+  align-self: center;
+  text-align: center;
+}
+
+:local(.video-streaming-box) {
+  height: 380px;
+  position: absolute;
+  bottom: 10px;
+  left: calc(50% - 275px);
+  right: calc(50% - 275px);
+  width: 550px;
+  background: black;
+}
+
+:local(.videoStreamingFrame){
+  height:100%;
+  width: 100%;
+}
 :local(.toolbar) {
   grid-row-start: toolbar;
   grid-column-end: -1;
