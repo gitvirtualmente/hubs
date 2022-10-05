@@ -174,7 +174,8 @@ class UIRoot extends Component {
     linkCode: null,
     linkCodeCancel: null,
     miniInviteActivated: false,
-
+    isVideoStreaming: false,
+    isSplitScreen: false,
     didConnectToNetworkedScene: false,
     noMoreLoadingUpdates: false,
     hideLoader: false,
@@ -275,6 +276,15 @@ class UIRoot extends Component {
       this.setState({ presenceCount: this.occupantCount() });
     }
   }
+// this method should be called every 2 seconds
+  onStreamingShow = () => {
+    this.setState({ isVideoStreaming: !this.state.isVideoStreaming });
+  };
+
+
+  onSplitScreen = () => {
+    this.setState({ isSplitScreen: !this.state.isSplitScreen });
+  };
 
   onConcurrentLoad = () => {
     if (qsTruthy("allow_multi") || this.props.store.state.preferences.allowMultipleHubsInstances) return;
@@ -932,7 +942,7 @@ class UIRoot extends Component {
 
   render() {
     const isGhost =
-      configs.feature("enable_lobby_ghosts") && (this.state.watching || (this.state.hide || this.props.hide));
+      configs.feature("enable_lobby_ghosts") && (this.state.watching || this.state.hide || this.props.hide);
     const hide = this.state.hide || this.props.hide;
 
     const rootStyles = {
@@ -946,6 +956,10 @@ class UIRoot extends Component {
       return (
         <div className={classNames(rootStyles)}>
           <RoomLayoutContainer
+            isVideoStreaming={this.state.isVideoStreaming}
+            onStreamingShow={this.onStreamingShow}
+            isSplitScreen={this.state.isSplitScreen}
+            onSplitScreen={this.onSplitScreen}
             scene={this.props.scene}
             store={this.props.store}
             viewport={!this.state.hideUITip && <FullscreenTip onDismiss={() => this.setState({ hideUITip: true })} />}
@@ -957,7 +971,15 @@ class UIRoot extends Component {
     if (this.props.showSafariMicDialog) {
       return (
         <div className={classNames(rootStyles)}>
-          <RoomLayoutContainer scene={this.props.scene} store={this.props.store} modal={<SafariMicModal />} />
+          <RoomLayoutContainer
+            isVideoStreaming={this.state.isVideoStreaming}
+            onStreamingShow={this.onStreamingShow}
+            isSplitScreen={this.state.isSplitScreen}
+            onSplitScreen={this.onSplitScreen}
+            scene={this.props.scene}
+            store={this.props.store}
+            modal={<SafariMicModal />}
+          />
         </div>
       );
     }
@@ -1283,15 +1305,14 @@ class UIRoot extends Component {
       <MoreMenuContextProvider>
         <ReactAudioContext.Provider value={this.state.audioContext}>
           <div className={classNames(rootStyles)}>
-            {preload &&
-              this.props.hub && (
-                <PreloadOverlay
-                  hubName={this.props.hub.name}
-                  hubScene={this.props.hub.scene}
-                  baseUrl={hubUrl(this.props.hub.hub_id).href}
-                  onLoadClicked={this.props.onPreloadLoadClicked}
-                />
-              )}
+            {preload && this.props.hub && (
+              <PreloadOverlay
+                hubName={this.props.hub.name}
+                hubScene={this.props.hub.scene}
+                baseUrl={hubUrl(this.props.hub.hub_id).href}
+                onLoadClicked={this.props.onPreloadLoadClicked}
+              />
+            )}
             {!this.state.dialog && (
               <StateRoute
                 stateKey="overlay"
@@ -1322,30 +1343,33 @@ class UIRoot extends Component {
                 )}
               />
             )}
-            {!this.state.dialog &&
-              showMediaBrowser && (
-                <MediaBrowserContainer
-                  history={this.props.history}
-                  mediaSearchStore={this.props.mediaSearchStore}
-                  hubChannel={this.props.hubChannel}
-                  onMediaSearchResultEntrySelected={(entry, selectAction) => {
-                    if (entry.type === "room") {
-                      this.showNonHistoriedDialog(LeaveRoomModal, {
-                        destinationUrl: entry.url,
-                        reason: LeaveReason.joinRoom
-                      });
-                    } else {
-                      this.props.onMediaSearchResultEntrySelected(entry, selectAction);
-                    }
-                  }}
-                  performConditionalSignIn={this.props.performConditionalSignIn}
-                  showNonHistoriedDialog={this.showNonHistoriedDialog}
-                  store={this.props.store}
-                  scene={this.props.scene}
-                />
-              )}
+            {!this.state.dialog && showMediaBrowser && (
+              <MediaBrowserContainer
+                history={this.props.history}
+                mediaSearchStore={this.props.mediaSearchStore}
+                hubChannel={this.props.hubChannel}
+                onMediaSearchResultEntrySelected={(entry, selectAction) => {
+                  if (entry.type === "room") {
+                    this.showNonHistoriedDialog(LeaveRoomModal, {
+                      destinationUrl: entry.url,
+                      reason: LeaveReason.joinRoom
+                    });
+                  } else {
+                    this.props.onMediaSearchResultEntrySelected(entry, selectAction);
+                  }
+                }}
+                performConditionalSignIn={this.props.performConditionalSignIn}
+                showNonHistoriedDialog={this.showNonHistoriedDialog}
+                store={this.props.store}
+                scene={this.props.scene}
+              />
+            )}
             {this.props.hub && (
               <RoomLayoutContainer
+                isVideoStreaming={this.state.isVideoStreaming}
+                onStreamingShow={this.onStreamingShow}
+                isSplitScreen={this.state.isSplitScreen}
+                onSplitScreen={this.onSplitScreen}
                 scene={this.props.scene}
                 store={this.props.store}
                 objectFocused={!!this.props.selectedObject}
@@ -1383,17 +1407,16 @@ class UIRoot extends Component {
                         }}
                       />
                     )}
-                    {this.state.sidebarId !== "chat" &&
-                      this.props.hub && (
-                        <PresenceLog
-                          inRoom={true}
-                          presences={this.props.presences}
-                          entries={presenceLogEntries}
-                          hubId={this.props.hub.hub_id}
-                          history={this.props.history}
-                          onViewProfile={sessionId => this.setSidebar("user", { selectedUserId: sessionId })}
-                        />
-                      )}
+                    {this.state.sidebarId !== "chat" && this.props.hub && (
+                      <PresenceLog
+                        inRoom={true}
+                        presences={this.props.presences}
+                        entries={presenceLogEntries}
+                        hubId={this.props.hub.hub_id}
+                        history={this.props.history}
+                        onViewProfile={sessionId => this.setSidebar("user", { selectedUserId: sessionId })}
+                      />
+                    )}
                     <TipContainer
                       hide={this.props.activeObject}
                       inLobby={watching}
@@ -1508,17 +1531,27 @@ class UIRoot extends Component {
                         />
                       )}
                     </>
-                  ) : (
-                    undefined
-                  )
+                  ) : undefined
                 }
                 modal={this.state.dialog}
                 toolbarLeft={
-                  <InvitePopoverContainer
-                    hub={this.props.hub}
-                    hubChannel={this.props.hubChannel}
-                    scene={this.props.scene}
-                  />
+                  <>
+                    <button
+                      onClick={() => this.onStreamingShow()}
+                      className={classNames(
+                        styles.streamingButton
+                        // { [styles.streaming]: this.isVideoStreaming }
+                      )}
+                    >
+                      <FormattedMessage id="room.video-streaming-button" defaultMessage="Stream" />
+                    </button>
+
+                    <InvitePopoverContainer
+                      hub={this.props.hub}
+                      hubChannel={this.props.hubChannel}
+                      scene={this.props.scene}
+                    />
+                  </>
                 }
                 toolbarCenter={
                   <>
@@ -1561,29 +1594,27 @@ class UIRoot extends Component {
                       </>
                     )}
                     <ChatToolbarButtonContainer onClick={() => this.toggleSidebar("chat")} />
-                    {entered &&
-                      isMobileVR && (
-                        <ToolbarButton
-                          className={styleUtils.hideLg}
-                          icon={<VRIcon />}
-                          preset="accept"
-                          label={<FormattedMessage id="toolbar.enter-vr-button" defaultMessage="Enter VR" />}
-                          onClick={() => exit2DInterstitialAndEnterVR(true)}
-                        />
-                      )}
+                    {entered && isMobileVR && (
+                      <ToolbarButton
+                        className={styleUtils.hideLg}
+                        icon={<VRIcon />}
+                        preset="accept"
+                        label={<FormattedMessage id="toolbar.enter-vr-button" defaultMessage="Enter VR" />}
+                        onClick={() => exit2DInterstitialAndEnterVR(true)}
+                      />
+                    )}
                   </>
                 }
                 toolbarRight={
                   <>
-                    {entered &&
-                      isMobileVR && (
-                        <ToolbarButton
-                          icon={<VRIcon />}
-                          preset="accept"
-                          label={<FormattedMessage id="toolbar.enter-vr-button" defaultMessage="Enter VR" />}
-                          onClick={() => exit2DInterstitialAndEnterVR(true)}
-                        />
-                      )}
+                    {entered && isMobileVR && (
+                      <ToolbarButton
+                        icon={<VRIcon />}
+                        preset="accept"
+                        label={<FormattedMessage id="toolbar.enter-vr-button" defaultMessage="Enter VR" />}
+                        onClick={() => exit2DInterstitialAndEnterVR(true)}
+                      />
+                    )}
                     {entered && (
                       <ToolbarButton
                         icon={<LeaveIcon />}
@@ -1613,27 +1644,24 @@ function UIRootHooksWrapper(props) {
   useAccessibleOutlineStyle();
   const breakpoint = useCssBreakpoints();
 
-  useEffect(
-    () => {
-      const el = document.getElementById("preload-overlay");
-      el.classList.add("loaded");
+  useEffect(() => {
+    const el = document.getElementById("preload-overlay");
+    el.classList.add("loaded");
 
-      const sceneEl = props.scene;
+    const sceneEl = props.scene;
 
-      sceneEl.classList.add(roomLayoutStyles.scene);
+    sceneEl.classList.add(roomLayoutStyles.scene);
 
-      // Remove the preload overlay after the animation has finished.
-      const timeout = setTimeout(() => {
-        el.remove();
-      }, 500);
+    // Remove the preload overlay after the animation has finished.
+    const timeout = setTimeout(() => {
+      el.remove();
+    }, 500);
 
-      return () => {
-        clearTimeout(timeout);
-        sceneEl.classList.remove(roomLayoutStyles.scene);
-      };
-    },
-    [props.scene]
-  );
+    return () => {
+      clearTimeout(timeout);
+      sceneEl.classList.remove(roomLayoutStyles.scene);
+    };
+  }, [props.scene]);
 
   return (
     <ChatContextProvider messageDispatch={props.messageDispatch}>

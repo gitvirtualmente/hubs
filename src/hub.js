@@ -1141,6 +1141,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       roles: meta.roles,
       permissions: meta.permissions,
       streaming: meta.streaming,
+      // videoStreaming: meta.videoStreaming,
       recording: meta.recording,
       hand_raised: meta.hand_raised,
       typing: meta.typing
@@ -1204,12 +1205,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
   events.on(`hub:change`, ({ key, current }) => {
+    // alert("in event" + current.videoStreaming);
     scene.emit("presence_updated", {
       sessionId: key,
       profile: current.profile,
       roles: current.roles,
       permissions: current.permissions,
       streaming: current.streaming,
+      // videoStreaming: current.videoStreaming,
       recording: current.recording,
       hand_raised: current.hand_raised,
       typing: current.typing

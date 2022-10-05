@@ -7,14 +7,46 @@
   grid-template-columns:
     [main] auto
     [sidebar] minmax(0, min-content);
-  
-  grid-template-rows: 
+
+  grid-template-rows:
     [viewport] auto
     [toolbar] min-content;
 
   overflow: hidden;
   position: relative;
   pointer-events: none;
+}
+
+:local(.videoStreamingOverlay) {
+  grid-column: main;
+  grid-row: viewport;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+
+}
+
+:local(.isVideoStreaming) {
+  position: absolute;
+  top: 20px;
+  left: 30px;
+  background: red;
+
+  height:40px;
+  width:50px;
+  button{
+    border-radius: 15px;
+    padding:4px;
+
+  }
+}
+
+:local(.streamingButton) {
+  position: absolute;
+  top: 50px;
+  left: 30px;
 }
 
 :local(.main) {
@@ -27,7 +59,7 @@
   overflow: hidden;
   width: 450px;
 
-  @media(max-width: theme.$breakpoint-lg - 1), (max-height: theme.$breakpoint-vr - 1) {
+  @media (max-width: theme.$breakpoint-lg - 1), (max-height: theme.$breakpoint-vr - 1) {
     position: fixed;
     top: 0;
     left: 0;
@@ -81,7 +113,7 @@
 }
 
 :local(.object-focused) {
-  @media(max-width: theme.$breakpoint-lg - 1), (max-height: theme.$breakpoint-vr - 1) {
+  @media (max-width: theme.$breakpoint-lg - 1), (max-height: theme.$breakpoint-vr - 1) {
     :local(.toolbar) {
       display: none;
     }

@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import classNames from "classnames";
 import styles from "./RoomLayout.scss";
 import { Toolbar } from "./Toolbar";
+import { FormattedMessage } from "react-intl";
 
 export function RoomLayout({
   className,
@@ -17,12 +18,33 @@ export function RoomLayout({
   viewport,
   objectFocused,
   streaming,
+  isVideoStreaming,
+  onStreamingShow,
+  onSplitScreen,
+  isSplitScreen,
   viewportRef,
   ...rest
 }) {
   return (
     <div className={classNames(styles.roomLayout, { [styles.objectFocused]: objectFocused }, className)} {...rest}>
       {sidebar && <div className={classNames(styles.sidebar, sidebarClassName)}>{sidebar}</div>}
+      {
+        <div
+          // className={classNames(styles.modalContainer, styles.viewport)}
+          className={classNames(styles.videoStreamingOverlay, styles.viewport, {
+            [styles.isVideoStreaming]: isVideoStreaming
+          })}
+        >
+          <button
+            onClick={() =>
+              // alert("om namo narayananaya ; Om shri chinmaya Sadgurave namah; om Namah Shivay; Om Ganaganapte namah")
+              onSplitScreen()
+            }
+          >
+            {isVideoStreaming && <FormattedMessage id="room.video-streaming-overlay" defaultMessage="Watch Stream" />}
+          </button>
+        </div>
+      }
       <div className={classNames(styles.modalContainer, styles.viewport)}>{modal}</div>
       {(toolbarLeft || toolbarCenter || toolbarRight) && (
         <Toolbar
@@ -33,7 +55,7 @@ export function RoomLayout({
         />
       )}
       <div
-        className={classNames(styles.main, styles.viewport, { [styles.streaming]: streaming }, viewportClassName)}
+        className={classNames(styles.main, styles.viewport, { [styles.streaming]: streaming , [styles.viewportSplit]: isSplitScreen}, viewportClassName)}
         ref={viewportRef}
       >
         {viewport}
@@ -55,5 +77,6 @@ RoomLayout.propTypes = {
   viewport: PropTypes.node,
   objectFocused: PropTypes.bool,
   streaming: PropTypes.bool,
+  isVideoStreaming: PropTypes.bool,
   viewportRef: PropTypes.any
 };
