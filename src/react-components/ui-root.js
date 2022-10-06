@@ -95,6 +95,8 @@ import { SpectatingLabel } from "./room/SpectatingLabel";
 import { SignInMessages } from "./auth/SignInModal";
 import { MediaDevicesEvents } from "../utils/media-devices-utils";
 import { TERMS, PRIVACY } from "../constants";
+import { getCurrentHubId } from "../utils/hub-utils";
+import axios from "axios";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -176,6 +178,7 @@ class UIRoot extends Component {
     miniInviteActivated: false,
     isVideoStreaming: false,
     isSplitScreen: false,
+    eventPopulation: 0,
     didConnectToNetworkedScene: false,
     noMoreLoadingUpdates: false,
     hideLoader: false,
@@ -274,13 +277,43 @@ class UIRoot extends Component {
 
     if (this.state.presenceCount != this.occupantCount()) {
       this.setState({ presenceCount: this.occupantCount() });
+      // axios.post("https://rhy-load.vercel.app/update/633c7fc2bfc5c8031d60ceb1", {
+      //   participants: this.occupantCount()
+      // });
+      const hubId = getCurrentHubId();
+      console.log(`Hub ID to sent to the server: ${hubId}`);
+
+      axios
+        .get(
+          "https://load-backend.herokuapp.com/event?hubId=" +
+            hubId +
+            "&participantCount=" +
+            this.occupantCount().toString()
+        )
+        .then(res => {
+          console.log(res.data);
+        });
+      // ---------
+      // axios
+      //   .get(
+      //     ///[venueid]/[hubId][eventId][participantCount]
+      //     "https://timecommit.com/api/v1/venue/633e72de74f2a8d30bab5017/" +
+      //       hubId +
+      //       "/633e731474f2a8d30bab5018/" +
+      //       this.occupantCount().toString()
+      //   )
+      //   .then(res => {
+      //     // this.setState({ eventPopulation: res.data.eventPopulation });
+      //     this.setState({ eventPopulation: 1 });
+      //     console.log(this.state.eventPopulation);
+      //   });
+      // axios.get("https://rhy-load.vercel.app/api/v1/event/633a9171b31852602b2ccef9",).then(res => console.log(res.data));
     }
   }
-// this method should be called every 2 seconds
+  // this method should be called every 2 seconds
   onStreamingShow = () => {
     this.setState({ isVideoStreaming: !this.state.isVideoStreaming });
   };
-
 
   onSplitScreen = () => {
     this.setState({ isSplitScreen: !this.state.isSplitScreen });
@@ -958,6 +991,7 @@ class UIRoot extends Component {
           <RoomLayoutContainer
             isVideoStreaming={this.state.isVideoStreaming}
             onStreamingShow={this.onStreamingShow}
+            eventPopulation={this.state.eventPopulation}
             isSplitScreen={this.state.isSplitScreen}
             onSplitScreen={this.onSplitScreen}
             scene={this.props.scene}
@@ -974,6 +1008,7 @@ class UIRoot extends Component {
           <RoomLayoutContainer
             isVideoStreaming={this.state.isVideoStreaming}
             onStreamingShow={this.onStreamingShow}
+            eventPopulation={this.state.eventPopulation}
             isSplitScreen={this.state.isSplitScreen}
             onSplitScreen={this.onSplitScreen}
             scene={this.props.scene}
@@ -1368,6 +1403,7 @@ class UIRoot extends Component {
               <RoomLayoutContainer
                 isVideoStreaming={this.state.isVideoStreaming}
                 onStreamingShow={this.onStreamingShow}
+                eventPopulation={this.state.eventPopulation}
                 isSplitScreen={this.state.isSplitScreen}
                 onSplitScreen={this.onSplitScreen}
                 scene={this.props.scene}
@@ -1545,6 +1581,7 @@ class UIRoot extends Component {
                     >
                       <FormattedMessage id="room.video-streaming-button" defaultMessage="Stream" />
                     </button>
+                    {!this.state.eventPopulation && this.state.eventPopulation?.toString()}
 
                     <InvitePopoverContainer
                       hub={this.props.hub}

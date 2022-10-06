@@ -19,6 +19,7 @@ export function RoomLayout({
   objectFocused,
   streaming,
   isVideoStreaming,
+  eventPopulation,
   onStreamingShow,
   onSplitScreen,
   isSplitScreen,
@@ -55,19 +56,33 @@ export function RoomLayout({
         />
       )}
       {isSplitScreen && (
-        <div className={classNames(styles.main, styles.viewport, styles.videoStreamingOverlay, styles.videoStreamingBox)}>
-          <iframe
+        <div
+          className={classNames(styles.main, styles.viewport, styles.videoStreamingOverlay, styles.videoStreamingBox)}
+        >
+          {/* <iframe
             className={classNames(styles.videoStreamingFrame)}
-            src="https://www.youtube.com/embed/C1DDT16ewdE"
+            src="https://youactors-backend.flumotion.com/api/v1/player_site/?asset=737303&player=762"
             title="Eventos virtuales 3D - Rhy Marketing"
             // frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen="true"
-          ></iframe>
+          ></iframe> */}
+          <iframe
+            id="flumotion_iframe_player"
+            name="flumotion_iframe_player"
+            src="http://youactors-backend.flumotion.com/api/v1/player_site/?asset=737303&player=762"
+            scrolling="no"
+            frameBorder="0"
+            width="640px"
+            height="360px"
+            allowFullScreen
+            webkitallowfullscreen
+            mozallowfullscreen
+          />
         </div>
       )}
 
-      <div className={classNames(styles.main, styles.peopleCount)}>20/100</div>
+      <div className={classNames(styles.main, styles.peopleCount)}>{eventPopulation?.toString()}/100</div>
 
       <div
         className={classNames(

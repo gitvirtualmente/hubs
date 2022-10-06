@@ -9,6 +9,7 @@ export function RoomLayoutContainer({
   isVideoStreaming,
   isSplitScreen,
   onStreamingShow,
+  eventPopulation,
   onSplitScreen,
   ...rest
 }) {
@@ -23,6 +24,7 @@ export function RoomLayoutContainer({
       onStreamingShow={onStreamingShow}
       isSplitScreen={isSplitScreen}
       onSplitScreen={onSplitScreen}
+      eventPopulation={eventPopulation}
       viewportRef={viewportRef}
       {...rest}
     />
