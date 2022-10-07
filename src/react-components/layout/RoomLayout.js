@@ -4,6 +4,7 @@ import classNames from "classnames";
 import styles from "./RoomLayout.scss";
 import { Toolbar } from "./Toolbar";
 import { FormattedMessage } from "react-intl";
+import { Button } from '../input/Button';
 
 export function RoomLayout({
   className,
@@ -36,14 +37,9 @@ export function RoomLayout({
             [styles.isVideoStreaming]: isVideoStreaming
           })}
         >
-          <button
-            onClick={() =>
-              // alert("om namo narayananaya ; Om shri chinmaya Sadgurave namah; om Namah Shivay; Om Ganaganapte namah")
-              onSplitScreen()
-            }
-          >
+          <Button preset="accent2" onClick={() => onSplitScreen()}>
             {isVideoStreaming && <FormattedMessage id="room.video-streaming-overlay" defaultMessage="Watch Stream" />}
-          </button>
+          </Button>
         </div>
       }
       <div className={classNames(styles.modalContainer, styles.viewport)}>{modal}</div>
@@ -60,7 +56,6 @@ export function RoomLayout({
           className={classNames(styles.main, styles.viewport, styles.videoStreamingOverlay, styles.videoStreamingBox)}
         >
           {/* <iframe
-            className={classNames(styles.videoStreamingFrame)}
             src="https://youactors-backend.flumotion.com/api/v1/player_site/?asset=737303&player=762"
             title="Eventos virtuales 3D - Rhy Marketing"
             // frameBorder="0"
@@ -68,17 +63,10 @@ export function RoomLayout({
             allowFullScreen="true"
           ></iframe> */}
           <iframe
-            id="flumotion_iframe_player"
-            name="flumotion_iframe_player"
-            src="http://youactors-backend.flumotion.com/api/v1/player_site/?asset=737303&player=762"
-            scrolling="no"
-            frameBorder="0"
-            width="640px"
-            height="360px"
-            allowFullScreen
-            webkitallowfullscreen
-            mozallowfullscreen
-          />
+            className={classNames(styles.videoStreamingFrame)}
+            src="https://youactors-backend.flumotion.com/api/v1/player_site/?asset=737303&player=762"
+            title="description"
+          ></iframe>
         </div>
       )}
 

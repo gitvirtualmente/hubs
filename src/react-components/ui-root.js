@@ -176,7 +176,7 @@ class UIRoot extends Component {
     linkCode: null,
     linkCodeCancel: null,
     miniInviteActivated: false,
-    isVideoStreaming: false,
+    isVideoStreaming: true,//setting it true by default at the start
     isSplitScreen: false,
     eventPopulation: 0,
     didConnectToNetworkedScene: false,
@@ -294,14 +294,14 @@ class UIRoot extends Component {
           console.log(res.data);
         });
       // ---------
-      // axios
-      //   .get(
-      //     ///[venueid]/[hubId][eventId][participantCount]
-      //     "https://timecommit.com/api/v1/venue/633e72de74f2a8d30bab5017/" +
-      //       hubId +
-      //       "/633e731474f2a8d30bab5018/" +
-      //       this.occupantCount().toString()
-      //   )
+      axios
+        .get(
+          ///[venueid]/[hubId][eventId][participantCount]
+          "https://rhy-load.vercel.app/api/v1/venue/633e72de74f2a8d30bab5017/" +
+            hubId +
+            "/633e731474f2a8d30bab5018/" +
+            this.occupantCount().toString()
+        )
       //   .then(res => {
       //     // this.setState({ eventPopulation: res.data.eventPopulation });
       //     this.setState({ eventPopulation: 1 });
@@ -1572,7 +1572,7 @@ class UIRoot extends Component {
                 modal={this.state.dialog}
                 toolbarLeft={
                   <>
-                    <button
+                    {/* <button
                       onClick={() => this.onStreamingShow()}
                       className={classNames(
                         styles.streamingButton
@@ -1580,8 +1580,8 @@ class UIRoot extends Component {
                       )}
                     >
                       <FormattedMessage id="room.video-streaming-button" defaultMessage="Stream" />
-                    </button>
-                    {!this.state.eventPopulation && this.state.eventPopulation?.toString()}
+                    </button> */}
+                    {/* {!this.state.eventPopulation && this.state.eventPopulation?.toString()} */}
 
                     <InvitePopoverContainer
                       hub={this.props.hub}

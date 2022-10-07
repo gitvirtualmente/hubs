@@ -30,7 +30,7 @@
 :local(.isVideoStreaming) {
   position: absolute;
   top: 20px;
-  left: 30px;
+  left: 60px;
   background: red;
 
   height: 40px;
@@ -98,10 +98,10 @@
   position: absolute;
   bottom: 120px;
   margin: auto;
-  left: 50;
+  left: 50px;
   width: 80px;
   background: white;
-  border: 2px solid red;
+  border: 2px solid greenyellow;
   border-radius: 12px;
   color: black;
   display: flex;
@@ -120,8 +120,8 @@
   background: black;
 }
 
-:local(.videoStreamingFrame){
-  height:100%;
+:local(.videoStreamingFrame) {
+  height: 100%;
   width: 100%;
 }
 :local(.toolbar) {
