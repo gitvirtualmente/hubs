@@ -17,7 +17,7 @@
   pointer-events: none;
 }
 // this is the show the button
-:local(.videoStreamingOverlay) {
+:local(.video-streaming-overlay) {
   grid-column: main;
   grid-row: viewport;
   position: relative;
@@ -25,9 +25,10 @@
   justify-content: center;
   align-items: center;
   z-index: 10;
+
 }
 
-:local(.isVideoStreaming) {
+:local(.is-video-streaming) {
   position: absolute;
   top: 20px;
   left: 60px;
@@ -97,6 +98,7 @@
   }
   @media (max-width: theme.$breakpoint-lg - 1), (max-height: theme.$breakpoint-vr - 1) {
     flex-direction: row-reverse;
+    height: 100%;
   }
 }
 
@@ -118,13 +120,23 @@
 }
 
 :local(.video-streaming-box) {
-  height: 380px;
+  height: 350px;
   position: absolute;
   bottom: 10px;
   left: calc(50% - 275px);
   right: calc(50% - 275px);
   width: 550px;
   background: black;
+
+  @media (max-width: theme.$breakpoint-lg - 1), (max-height: theme.$breakpoint-vr - 1) {
+    height: 250px;
+    bottom: auto;
+    top: 0px;
+
+    left: calc(50% - 212.5px);
+    right: calc(50% - 212.5px);
+    width: 425px;
+  }
 }
 
 :local(.videoStreamingFrame) {

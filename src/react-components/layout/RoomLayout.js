@@ -39,7 +39,13 @@ export function RoomLayout({
           })}
         >
           <Button preset="accent2" onClick={() => onSplitScreen()}>
-            <FormattedMessage id="room.video-streaming-overlay" defaultMessage="Watch Stream" />
+            {entered &&
+              isVideoStreaming &&
+              (isSplitScreen ? (
+                <FormattedMessage id="room.video-streaming-overlay-end" defaultMessage="End Stream" />
+              ) : (
+                <FormattedMessage id="room.video-streaming-overlay" defaultMessage="Watch Stream" />
+              ))}
           </Button>
         </div>
       )}
