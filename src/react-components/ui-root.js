@@ -283,16 +283,16 @@ class UIRoot extends Component {
       const hubId = getCurrentHubId();
       console.log(`Hub ID to sent to the server: ${hubId}`);
 
-      axios
-        .get(
-          "https://load-backend.herokuapp.com/event?hubId=" +
-            hubId +
-            "&participantCount=" +
-            this.occupantCount().toString()
-        )
-        .then(res => {
-          console.log(res.data);
-        });
+      // axios
+      //   .get(
+      //     "https://load-backend.herokuapp.com/event?hubId=" +
+      //       hubId +
+      //       "&participantCount=" +
+      //       this.occupantCount().toString()
+      //   )
+      //   .then(res => {
+      //     console.log(res.data);
+      //   });
       // ---------
       axios
         .get(
@@ -989,6 +989,7 @@ class UIRoot extends Component {
       return (
         <div className={classNames(rootStyles)}>
           <RoomLayoutContainer
+          entered={this.state.entered}
             isVideoStreaming={this.state.isVideoStreaming}
             onStreamingShow={this.onStreamingShow}
             eventPopulation={this.state.eventPopulation}
@@ -1006,6 +1007,7 @@ class UIRoot extends Component {
       return (
         <div className={classNames(rootStyles)}>
           <RoomLayoutContainer
+          entered={this.state.entered}
             isVideoStreaming={this.state.isVideoStreaming}
             onStreamingShow={this.onStreamingShow}
             eventPopulation={this.state.eventPopulation}
@@ -1401,6 +1403,7 @@ class UIRoot extends Component {
             )}
             {this.props.hub && (
               <RoomLayoutContainer
+              entered={this.state.entered}
                 isVideoStreaming={this.state.isVideoStreaming}
                 onStreamingShow={this.onStreamingShow}
                 eventPopulation={this.state.eventPopulation}

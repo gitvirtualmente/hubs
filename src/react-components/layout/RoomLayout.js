@@ -4,7 +4,7 @@ import classNames from "classnames";
 import styles from "./RoomLayout.scss";
 import { Toolbar } from "./Toolbar";
 import { FormattedMessage } from "react-intl";
-import { Button } from '../input/Button';
+import { Button } from "../input/Button";
 
 export function RoomLayout({
   className,
@@ -19,6 +19,7 @@ export function RoomLayout({
   viewport,
   objectFocused,
   streaming,
+  entered,
   isVideoStreaming,
   eventPopulation,
   onStreamingShow,
@@ -30,7 +31,7 @@ export function RoomLayout({
   return (
     <div className={classNames(styles.roomLayout, { [styles.objectFocused]: objectFocused }, className)} {...rest}>
       {sidebar && <div className={classNames(styles.sidebar, sidebarClassName)}>{sidebar}</div>}
-      {
+      {entered && isVideoStreaming && (
         <div
           // className={classNames(styles.modalContainer, styles.viewport)}
           className={classNames(styles.videoStreamingOverlay, styles.viewport, {
@@ -38,10 +39,10 @@ export function RoomLayout({
           })}
         >
           <Button preset="accent2" onClick={() => onSplitScreen()}>
-            {isVideoStreaming && <FormattedMessage id="room.video-streaming-overlay" defaultMessage="Watch Stream" />}
+            <FormattedMessage id="room.video-streaming-overlay" defaultMessage="Watch Stream" />
           </Button>
         </div>
-      }
+      )}
       <div className={classNames(styles.modalContainer, styles.viewport)}>{modal}</div>
       {(toolbarLeft || toolbarCenter || toolbarRight) && (
         <Toolbar
@@ -70,7 +71,7 @@ export function RoomLayout({
         </div>
       )}
 
-      <div className={classNames(styles.main, styles.peopleCount)}>{eventPopulation?.toString()}/100</div>
+      {/* <div className={classNames(styles.main, styles.peopleCount)}>{eventPopulation?.toString()}/100</div> */}
 
       <div
         className={classNames(
