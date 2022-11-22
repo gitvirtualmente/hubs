@@ -91,7 +91,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 60%;
+  height: 70%;
   width: 100%;
   & > * {
     pointer-events: auto;
@@ -120,12 +120,12 @@
 }
 
 :local(.video-streaming-box) {
-  height: 350px;
+  height: 234px;
   position: absolute;
   bottom: 10px;
   left: calc(50% - 275px);
   right: calc(50% - 275px);
-  width: 550px;
+  width: 417px;
   background: black;
 
   @media (max-width: theme.$breakpoint-lg - 1), (max-height: theme.$breakpoint-vr - 1) {

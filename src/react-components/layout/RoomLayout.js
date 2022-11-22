@@ -42,7 +42,7 @@ export function RoomLayout({
             {entered &&
               isVideoStreaming &&
               (isSplitScreen ? (
-                <FormattedMessage id="room.video-streaming-overlay-end" defaultMessage="End Stream" />
+                <FormattedMessage id="room.video-streaming-overlay-end" defaultMessage="Hide Stream" />
               ) : (
                 <FormattedMessage id="room.video-streaming-overlay" defaultMessage="Watch Stream" />
               ))}
@@ -69,11 +69,11 @@ export function RoomLayout({
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen="true"
           ></iframe> */}
-          <iframe
+          {/* <iframe
             className={classNames(styles.videoStreamingFrame)}
             src="https://youactors-backend.flumotion.com/api/v1/player_site/?asset=737303&player=762"
             title="description"
-          ></iframe>
+          ></iframe> */}
         </div>
       )}
 

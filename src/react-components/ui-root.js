@@ -176,7 +176,7 @@ class UIRoot extends Component {
     linkCode: null,
     linkCodeCancel: null,
     miniInviteActivated: false,
-    isVideoStreaming: true,//setting it true by default at the start
+    isVideoStreaming: true, //setting it true by default at the start
     isSplitScreen: false,
     eventPopulation: 0,
     didConnectToNetworkedScene: false,
@@ -281,38 +281,36 @@ class UIRoot extends Component {
       //   participants: this.occupantCount()
       // });
       const hubId = getCurrentHubId();
-      console.log(`Hub ID to sent to the server: ${hubId}`);
+      console.log(`Hub ID to send to the server: ${hubId}`);
 
-      // axios
-      //   .get(
-      //     "https://load-backend.herokuapp.com/event?hubId=" +
-      //       hubId +
-      //       "&participantCount=" +
-      //       this.occupantCount().toString()
-      //   )
-      //   .then(res => {
-      //     console.log(res.data);
-      //   });
-      // ---------
+      axios.get(
+        // venue/[hubid]/[participantCount]
+        "https://rhy-load.vercel.app/api/v2/venue/" + hubId + "/" + this.occupantCount().toString()
+      );
       axios
         .get(
-          ///[venueid]/[hubId][eventId][participantCount]
-          "https://rhy-load.vercel.app/api/v1/venue/633e72de74f2a8d30bab5017/" +
-            hubId +
-            "/633e731474f2a8d30bab5018/" +
-            this.occupantCount().toString()
+          // venue/[hubid]/[participantCount]
+          "https://rhy-load.vercel.app/api/v2/venue/" + hubId + "/streaming"
         )
-      //   .then(res => {
-      //     // this.setState({ eventPopulation: res.data.eventPopulation });
-      //     this.setState({ eventPopulation: 1 });
-      //     console.log(this.state.eventPopulation);
-      //   });
-      // axios.get("https://rhy-load.vercel.app/api/v1/event/633a9171b31852602b2ccef9",).then(res => console.log(res.data));
+        .then(response => {
+          console.log(response.data);
+          if (response.data == "0" || response.data == 0) {
+            this.onStreamingShow(false);
+          } else {
+            this.onStreamingShow(true);
+          }
+        })
+        .catch(error => {
+          console.log(error);
+          this.onStreamingShow(false);
+        });
     }
   }
   // this method should be called every 2 seconds
-  onStreamingShow = () => {
-    this.setState({ isVideoStreaming: !this.state.isVideoStreaming });
+  onStreamingShow = value => {
+    this.setState({ isVideoStreaming: value });
+    console.log("----------------");
+    console.log(this.state.isVideoStreaming);
   };
 
   onSplitScreen = () => {
@@ -989,7 +987,7 @@ class UIRoot extends Component {
       return (
         <div className={classNames(rootStyles)}>
           <RoomLayoutContainer
-          entered={this.state.entered}
+            entered={this.state.entered}
             isVideoStreaming={this.state.isVideoStreaming}
             onStreamingShow={this.onStreamingShow}
             eventPopulation={this.state.eventPopulation}
@@ -1007,7 +1005,7 @@ class UIRoot extends Component {
       return (
         <div className={classNames(rootStyles)}>
           <RoomLayoutContainer
-          entered={this.state.entered}
+            entered={this.state.entered}
             isVideoStreaming={this.state.isVideoStreaming}
             onStreamingShow={this.onStreamingShow}
             eventPopulation={this.state.eventPopulation}
@@ -1403,7 +1401,7 @@ class UIRoot extends Component {
             )}
             {this.props.hub && (
               <RoomLayoutContainer
-              entered={this.state.entered}
+                entered={this.state.entered}
                 isVideoStreaming={this.state.isVideoStreaming}
                 onStreamingShow={this.onStreamingShow}
                 eventPopulation={this.state.eventPopulation}
