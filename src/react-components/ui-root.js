@@ -294,10 +294,10 @@ class UIRoot extends Component {
         )
         .then(response => {
           console.log(response.data);
-          if (response.data == "0" || response.data == 0) {
-            this.onStreamingShow(false);
-          } else {
+          if (response.data == "1" || response.data == 1) {
             this.onStreamingShow(true);
+          } else {
+            this.onStreamingShow(false);
           }
         })
         .catch(error => {
