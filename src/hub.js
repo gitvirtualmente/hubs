@@ -629,20 +629,20 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     updateUIForHub(hub, hubChannel);
     scene.emit("hub_updated", { hub });
 
-    if (!isEmbed) {
-      console.log("Page is not embedded so environment initialization will start immediately");
-      loadEnvironmentAndConnect();
-    } else {
-      console.log("Page is embedded so environment initialization will be deferred");
-      remountUI({
-        onPreloadLoadClicked: () => {
-          console.log("Preload has been activated");
-          hubChannel.allowNAFTraffic(true);
-          remountUI({ showPreload: false });
-          loadEnvironmentAndConnect();
-        }
-      });
-    }
+    // if (!isEmbed) {
+    console.log("Page is not embedded so environment initialization will start immediately");
+    loadEnvironmentAndConnect();
+    // } else {
+    //   console.log("Page is embedded so environment initialization will be deferred");
+    //   remountUI({
+    //     onPreloadLoadClicked: () => {
+    //       console.log("Preload has been activated");
+    //       hubChannel.allowNAFTraffic(true);
+    //       remountUI({ showPreload: false });
+    //       loadEnvironmentAndConnect();
+    // }
+    // });
+    // }
   })();
 }
 

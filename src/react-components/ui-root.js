@@ -1019,7 +1019,8 @@ class UIRoot extends Component {
       );
     }
 
-    const preload = this.props.showPreload;
+    // const preload = this.props.showPreload;
+    const preload = false;
 
     const isLoading = !preload && !this.state.hideLoader;
 
