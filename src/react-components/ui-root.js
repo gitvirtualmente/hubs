@@ -303,15 +303,16 @@ class UIRoot extends Component {
         .catch(error => {
           console.log(error);
           this.onStreamingShow(false);
+          // this.onStreamingShow(true);
         });
     }
   }
   // this method should be called every 2 seconds
-  onStreamingShow = value => {
-    this.setState({ isVideoStreaming: value });
-    console.log("----------------");
-    console.log(this.state.isVideoStreaming);
-  };
+  // onStreamingShow = value => {
+  //   this.setState({ isVideoStreaming: value });
+  //   console.log("----------------");
+  //   console.log(this.state.isVideoStreaming);
+  // };
 
   onSplitScreen = () => {
     this.setState({ isSplitScreen: !this.state.isSplitScreen });

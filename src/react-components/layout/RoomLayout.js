@@ -35,7 +35,8 @@ export function RoomLayout({
         <div
           // className={classNames(styles.modalContainer, styles.viewport)}
           className={classNames(styles.videoStreamingOverlay, styles.viewport, {
-            [styles.isVideoStreaming]: isVideoStreaming
+            [styles.isVideoStreaming]: isVideoStreaming,
+            [styles.isSplitScreen]: isSplitScreen
           })}
         >
           <Button preset="accent2" onClick={() => onSplitScreen()}>
@@ -69,11 +70,7 @@ export function RoomLayout({
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen="true"
           ></iframe> */}
-          {/* <iframe
-            className={classNames(styles.videoStreamingFrame)}
-            src="https://youactors-backend.flumotion.com/api/v1/player_site/?asset=737303&player=762"
-            title="description"
-          ></iframe> */}
+          <iframe className={classNames(styles.videoStreamingFrame)} src="" title="description"></iframe>
         </div>
       )}
 
