@@ -294,7 +294,7 @@ class UIRoot extends Component {
         )
         .then(response => {
           console.log(response.data);
-          if (response.data == "1" || response.data == 1) {
+          if (response.data) {
             this.onStreamingShow(true);
           } else {
             this.onStreamingShow(false);
@@ -307,12 +307,12 @@ class UIRoot extends Component {
         });
     }
   }
-  // this method should be called every 2 seconds
-  // onStreamingShow = value => {
-  //   this.setState({ isVideoStreaming: value });
-  //   console.log("----------------");
-  //   console.log(this.state.isVideoStreaming);
-  // };
+
+  onStreamingShow = value => {
+    this.setState({ isVideoStreaming: value });
+    console.log("----------------");
+    console.log(this.state.isVideoStreaming);
+  };
 
   onSplitScreen = () => {
     this.setState({ isSplitScreen: !this.state.isSplitScreen });
