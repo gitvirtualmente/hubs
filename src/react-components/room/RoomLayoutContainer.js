@@ -7,6 +7,7 @@ export function RoomLayoutContainer({
   store,
   scene,
   isVideoStreaming,
+  videoStreamingUrl,
   entered,
   isSplitScreen,
   onStreamingShow,
@@ -21,8 +22,9 @@ export function RoomLayoutContainer({
 
   return (
     <RoomLayout
-    entered={entered}
+      entered={entered}
       isVideoStreaming={isVideoStreaming}
+      videoStreamingUrl={videoStreamingUrl}
       onStreamingShow={onStreamingShow}
       isSplitScreen={isSplitScreen}
       onSplitScreen={onSplitScreen}

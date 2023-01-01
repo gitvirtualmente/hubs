@@ -21,6 +21,7 @@ export function RoomLayout({
   streaming,
   entered,
   isVideoStreaming,
+  videoStreamingUrl,
   eventPopulation,
   onStreamingShow,
   onSplitScreen,
@@ -70,7 +71,11 @@ export function RoomLayout({
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen="true"
           ></iframe> */}
-          <iframe className={classNames(styles.videoStreamingFrame)} src="" title="description"></iframe>
+          <iframe
+            className={classNames(styles.videoStreamingFrame)}
+            src={videoStreamingUrl}
+            title="description"
+          ></iframe>
         </div>
       )}
 
@@ -105,5 +110,6 @@ RoomLayout.propTypes = {
   objectFocused: PropTypes.bool,
   streaming: PropTypes.bool,
   isVideoStreaming: PropTypes.bool,
+  videoStreamingUrl: PropTypes.string,
   viewportRef: PropTypes.any
 };

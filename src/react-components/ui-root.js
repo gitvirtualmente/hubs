@@ -177,6 +177,7 @@ class UIRoot extends Component {
     linkCodeCancel: null,
     miniInviteActivated: false,
     isVideoStreaming: true, //setting it true by default at the start
+    videoStreamingUrl: "", // this is the src used in iframe
     isSplitScreen: false,
     eventPopulation: 0,
     didConnectToNetworkedScene: false,
@@ -290,12 +291,30 @@ class UIRoot extends Component {
       axios
         .get(
           // venue/[hubid]/[participantCount]
+          "https://rhy-load.vercel.app/api/v2/venue/" + hubId + "/streaming-url"
+        )
+        .then(response => {
+          console.log(response.data);
+          this.setState({ videoStreamingUrl: response.data });
+        });
+      axios
+        .get(
+          // venue/[hubid]/[participantCount]
           "https://rhy-load.vercel.app/api/v2/venue/" + hubId + "/streaming"
         )
         .then(response => {
           console.log(response.data);
           if (response.data) {
             this.onStreamingShow(true);
+            axios
+              .get(
+                // venue/[hubid]/[participantCount]
+                "https://rhy-load.vercel.app/api/v2/venue/" + hubId + "/streaming-url"
+              )
+              .then(response => {
+                console.log(response.data);
+                this.setState({ videoStreamingUrl: response.data });
+              });
           } else {
             this.onStreamingShow(false);
           }
@@ -990,6 +1009,7 @@ class UIRoot extends Component {
           <RoomLayoutContainer
             entered={this.state.entered}
             isVideoStreaming={this.state.isVideoStreaming}
+            videoStreamingUrl={this.state.videoStreamingUrl}
             onStreamingShow={this.onStreamingShow}
             eventPopulation={this.state.eventPopulation}
             isSplitScreen={this.state.isSplitScreen}
@@ -1008,6 +1028,7 @@ class UIRoot extends Component {
           <RoomLayoutContainer
             entered={this.state.entered}
             isVideoStreaming={this.state.isVideoStreaming}
+            videoStreamingUrl={this.state.videoStreamingUrl}
             onStreamingShow={this.onStreamingShow}
             eventPopulation={this.state.eventPopulation}
             isSplitScreen={this.state.isSplitScreen}
@@ -1406,6 +1427,7 @@ class UIRoot extends Component {
               <RoomLayoutContainer
                 entered={this.state.entered}
                 isVideoStreaming={this.state.isVideoStreaming}
+                videoStreamingUrl={this.state.videoStreamingUrl}
                 onStreamingShow={this.onStreamingShow}
                 eventPopulation={this.state.eventPopulation}
                 isSplitScreen={this.state.isSplitScreen}
