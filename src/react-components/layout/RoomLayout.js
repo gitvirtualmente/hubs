@@ -74,6 +74,7 @@ export function RoomLayout({
           <iframe
             className={classNames(styles.videoStreamingFrame)}
             src={videoStreamingUrl}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             title="description"
           ></iframe>
         </div>

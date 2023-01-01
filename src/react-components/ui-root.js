@@ -291,15 +291,6 @@ class UIRoot extends Component {
       axios
         .get(
           // venue/[hubid]/[participantCount]
-          "https://rhy-load.vercel.app/api/v2/venue/" + hubId + "/streaming-url"
-        )
-        .then(response => {
-          console.log(response.data);
-          this.setState({ videoStreamingUrl: response.data });
-        });
-      axios
-        .get(
-          // venue/[hubid]/[participantCount]
           "https://rhy-load.vercel.app/api/v2/venue/" + hubId + "/streaming"
         )
         .then(response => {
