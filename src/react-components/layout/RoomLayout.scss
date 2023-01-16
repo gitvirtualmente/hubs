@@ -40,13 +40,13 @@
     border-radius: 15px;
     padding: 4px;
   }
-  @media (max-width: theme.$breakpoint-lg - 1), (max-height: theme.$breakpoint-vr - 1) {
+  @media (max-width: theme.$breakpoint-sm - 1), (max-height: theme.$breakpoint-vr - 1) {
     top: 60px;
     font-size: 10px;
   }
 }
 :local(.is-split-screen) {
-  @media (max-width: theme.$breakpoint-lg - 1), (max-height: theme.$breakpoint-vr - 1) {
+  @media (max-width: theme.$breakpoint-sm - 1), (max-height: theme.$breakpoint-vr - 1) {
     position: absolute;
     top: 280px !important;
     left: 60px !important;
@@ -102,7 +102,7 @@
   & > * {
     pointer-events: auto;
   }
-  @media (max-width: theme.$breakpoint-lg - 1), (max-height: theme.$breakpoint-vr - 1) {
+  @media (max-width: theme.$breakpoint-sm - 1), (max-height: theme.$breakpoint-vr - 1) {
     flex-direction: row-reverse;
     height: 100%;
   }
@@ -134,7 +134,7 @@
   width: 25%;
   background: black;
 
-  @media (max-width: theme.$breakpoint-lg - 1), (max-height: theme.$breakpoint-vr - 1) {
+  @media (max-width: theme.$breakpoint-sm - 1), (max-height: theme.$breakpoint-vr - 1) {
     height: 250px;
     bottom: auto;
     top: 0px;
