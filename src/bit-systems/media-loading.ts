@@ -1,50 +1,46 @@
-import { LoadingObject } from "../prefabs/loading-object";
+import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
+import { Vector3 } from "three";
+import { HubsWorld } from "../app";
+import { GLTFModel, MediaLoader, Networked, ObjectMenuTarget } from "../bit-components";
 import { ErrorObject } from "../prefabs/error-object";
-import { easeOutQuadratic } from "../utils/easing";
-import { loadImage } from "../utils/load-image";
-import { loadVideo } from "../utils/load-video";
-import { loadModel } from "../utils/load-model";
-import { MediaType, mediaTypeName, resolveMediaInfo } from "../utils/media-utils";
-import { defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
-import { MediaLoader, Networked } from "../bit-components";
-import { crTimeout, crClearTimeout, cancelable, coroutine, makeCancelable } from "../utils/coroutine";
-import { takeOwnership } from "../utils/take-ownership";
-import { renderAsEntity } from "../utils/jsx-entity";
+import { LoadingObject } from "../prefabs/loading-object";
 import { animate } from "../utils/animate";
+import { setNetworkedDataWithoutRoot } from "../utils/assign-network-ids";
+import { cancelable, coroutine, crClearTimeout, crTimeout, makeCancelable } from "../utils/coroutine";
+import { easeOutQuadratic } from "../utils/easing";
+import { renderAsEntity } from "../utils/jsx-entity";
+import { loadImage } from "../utils/load-image";
+import { loadModel } from "../utils/load-model";
+import { loadVideo } from "../utils/load-video";
+import { MediaType, mediaTypeName, resolveMediaInfo } from "../utils/media-utils";
+import { EntityID } from "../utils/networking-types";
 
 const loaderForMediaType = {
-  [MediaType.IMAGE]: (world, { accessibleUrl, contentType }) => loadImage(world, accessibleUrl, contentType),
-  [MediaType.VIDEO]: (world, { accessibleUrl }) => loadVideo(world, accessibleUrl),
-  [MediaType.MODEL]: (world, { accessibleUrl }) => loadModel(world, accessibleUrl, true)
+  [MediaType.IMAGE]: (
+    world: HubsWorld,
+    { accessibleUrl, contentType }: { accessibleUrl: string; contentType: string }
+  ) => loadImage(world, accessibleUrl, contentType),
+  [MediaType.VIDEO]: (world: HubsWorld, { accessibleUrl }: { accessibleUrl: string }) =>
+    loadVideo(world, accessibleUrl),
+  [MediaType.MODEL]: (
+    world: HubsWorld,
+    { accessibleUrl, contentType }: { accessibleUrl: string; contentType: string }
+  ) => loadModel(world, accessibleUrl, contentType, true)
 };
 
 export const MEDIA_LOADER_FLAGS = {
   RECENTER: 1 << 0,
   RESIZE: 1 << 1,
-  ANIMATE_LOAD: 1 << 2
+  ANIMATE_LOAD: 1 << 2,
+  IS_OBJECT_MENU_TARGET: 1 << 3
 };
 
-export function assignNetworkIds(world, rootNid, mediaEid, mediaLoaderEid) {
-  let i = 0;
-  world.eid2obj.get(mediaEid).traverse(function (obj) {
-    if (obj.eid && hasComponent(world, Networked, obj.eid)) {
-      const eid = obj.eid;
-      Networked.id[eid] = APP.getSid(`${rootNid}.${i}`);
-      APP.world.nid2eid.set(Networked.id[eid], eid);
-      Networked.creator[eid] = Networked.creator[mediaLoaderEid];
-      Networked.owner[eid] = Networked.owner[mediaLoaderEid];
-      if (APP.getSid(NAF.clientId) === Networked.owner[mediaLoaderEid]) takeOwnership(world, eid);
-      i += 1;
-    }
-  });
-}
-
-function resizeAndRecenter(world, media, eid) {
+function resizeAndRecenter(world: HubsWorld, media: EntityID, eid: EntityID) {
   const resize = MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.RESIZE;
   const recenter = MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.RECENTER;
   if (!resize && !recenter) return;
 
-  const mediaObj = world.eid2obj.get(media);
+  const mediaObj = world.eid2obj.get(media)!;
   const box = new THREE.Box3();
   box.setFromObject(mediaObj);
 
@@ -52,8 +48,8 @@ function resizeAndRecenter(world, media, eid) {
   if (resize) {
     const size = new THREE.Vector3();
     box.getSize(size);
-    // Might want to consider avatar scale someday
-    scale = 0.5 / Math.max(size.x, size.y, size.z);
+    const multiplier = hasComponent(world, GLTFModel, media) ? 0.5 : 1.0;
+    scale = multiplier / Math.max(size.x, size.y, size.z);
     mediaObj.scale.setScalar(scale);
     mediaObj.matrixNeedsUpdate = true;
   }
@@ -66,20 +62,20 @@ function resizeAndRecenter(world, media, eid) {
   }
 }
 
-function* animateScale(world, media) {
-  const mediaObj = world.eid2obj.get(media);
+export function* animateScale(world: HubsWorld, media: EntityID) {
+  const mediaObj = world.eid2obj.get(media)!;
 
-  const onAnimate = ([position, scale]) => {
+  const onAnimate = ([position, scale]: [Vector3, Vector3]) => {
     mediaObj.position.copy(position);
     mediaObj.scale.copy(scale);
     mediaObj.matrixNeedsUpdate = true;
   };
 
-  const startScale = new THREE.Vector3().setScalar(0.0001);
-  const endScale = new THREE.Vector3().setScalar(mediaObj.scale.x);
+  const startScale = new Vector3().setScalar(0.0001);
+  const endScale = new Vector3().setScalar(mediaObj.scale.x);
 
-  const startPosition = new THREE.Vector3().copy(mediaObj.position).multiplyScalar(startScale.x);
-  const endPosition = new THREE.Vector3().copy(mediaObj.position);
+  const startPosition = new Vector3().copy(mediaObj.position).multiplyScalar(startScale.x);
+  const endPosition = new Vector3().copy(mediaObj.position);
 
   // Set the initial position and yield one frame
   // because the first frame that we render a new object is slow
@@ -100,14 +96,14 @@ function* animateScale(world, media) {
 }
 
 // TODO: Move to bit utils and rename
-export function add(world, child, parent) {
-  const parentObj = world.eid2obj.get(parent);
-  const childObj = world.eid2obj.get(child);
+export function add(world: HubsWorld, child: EntityID, parent: EntityID) {
+  const parentObj = world.eid2obj.get(parent)!;
+  const childObj = world.eid2obj.get(child)!;
   parentObj.add(childObj);
 }
 
 class UnsupportedMediaTypeError extends Error {
-  constructor(eid, mediaType) {
+  constructor(eid: EntityID, mediaType: number | null) {
     super();
     this.name = "UnsupportedMediaTypeError";
     this.message = `Cannot load media for entity ${eid}. No loader for media type ${mediaType} (${mediaTypeName(
@@ -116,7 +112,16 @@ class UnsupportedMediaTypeError extends Error {
   }
 }
 
-function* loadMedia(world, eid) {
+type MediaInfo = {
+  accessibleUrl: string;
+  canonicalUrl: string;
+  canonicalAudioUrl: string | null;
+  contentType: string;
+  mediaType: number | null; // TODO: Use MediaType
+  thumbnail: string;
+};
+
+function* loadMedia(world: HubsWorld, eid: EntityID) {
   let loadingObjEid = 0;
   const addLoadingObjectTimeout = crTimeout(() => {
     loadingObjEid = renderAsEntity(world, LoadingObject());
@@ -126,8 +131,8 @@ function* loadMedia(world, eid) {
   const src = APP.getString(MediaLoader.src[eid]);
   let media;
   try {
-    const urlData = yield resolveMediaInfo(src);
-    const loader = loaderForMediaType[urlData.mediaType];
+    const urlData = (yield resolveMediaInfo(src)) as MediaInfo;
+    const loader = urlData.mediaType && loaderForMediaType[urlData.mediaType];
     if (!loader) {
       throw new UnsupportedMediaTypeError(eid, urlData.mediaType);
     }
@@ -141,12 +146,15 @@ function* loadMedia(world, eid) {
   return media;
 }
 
-function* loadAndAnimateMedia(world, eid, signal) {
+function* loadAndAnimateMedia(world: HubsWorld, eid: EntityID, signal: AbortSignal) {
   const { value: media, canceled } = yield* cancelable(loadMedia(world, eid), signal);
   if (!canceled) {
-    assignNetworkIds(world, APP.getString(Networked.id[eid]), media, eid);
     resizeAndRecenter(world, media, eid);
+    if (MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.IS_OBJECT_MENU_TARGET) {
+      addComponent(world, ObjectMenuTarget, eid);
+    }
     add(world, media, eid);
+    setNetworkedDataWithoutRoot(world, APP.getString(Networked.id[eid])!, media);
     if (MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.ANIMATE_LOAD) {
       yield* animateScale(world, media);
     }
@@ -159,7 +167,7 @@ const abortControllers = new Map();
 const mediaLoaderQuery = defineQuery([MediaLoader]);
 const mediaLoaderEnterQuery = enterQuery(mediaLoaderQuery);
 const mediaLoaderExitQuery = exitQuery(mediaLoaderQuery);
-export function mediaLoadingSystem(world) {
+export function mediaLoadingSystem(world: HubsWorld) {
   mediaLoaderEnterQuery(world).forEach(function (eid) {
     const ac = new AbortController();
     abortControllers.set(eid, ac);
@@ -172,7 +180,7 @@ export function mediaLoadingSystem(world) {
     abortControllers.delete(eid);
   });
 
-  jobs.forEach(c => {
+  jobs.forEach((c: any) => {
     if (c().done) {
       jobs.delete(c);
     }

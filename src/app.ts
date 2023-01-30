@@ -1,4 +1,3 @@
-import * as bitecs from "bitecs";
 import { addEntity, createWorld, IWorld } from "bitecs";
 import "./aframe-to-bit-components";
 import { AEntity, Networked, Object3DTag, Owned } from "./bit-components";
@@ -31,7 +30,6 @@ import { store } from "./utils/store-instance";
 
 declare global {
   interface Window {
-    $B: typeof bitecs;
     $O: (eid: number) => Object3D | undefined;
     APP: App;
   }
@@ -53,11 +51,22 @@ export interface HubsWorld extends IWorld {
   time: { delta: number; elapsed: number; tick: number };
 }
 
-window.$B = bitecs;
+let resolvePromiseToScene: (value: Scene) => void;
+const promiseToScene: Promise<Scene> = new Promise(resolve => {
+  resolvePromiseToScene = resolve;
+});
+export function getScene() {
+  return promiseToScene;
+}
+
+interface HubDescription {
+  hub_id: string;
+}
 
 export class App {
   scene?: AScene;
   hubChannel?: HubChannel;
+  hub?: HubDescription;
   mediaDevicesManager?: MediaDevicesManager;
   entryManager?: SceneEntryManager;
   messageDispatch?: any;
@@ -192,8 +201,10 @@ export class App {
       tick: 0
     };
 
-    this.world.scene = sceneEl.object3D;
+    this.scene = sceneEl;
     const scene = sceneEl.object3D;
+    this.world.scene = scene;
+    resolvePromiseToScene(scene);
 
     // We manually call scene.updateMatrixWolrd in mainTick
     scene.autoUpdate = false;

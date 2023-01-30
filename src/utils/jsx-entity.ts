@@ -1,8 +1,9 @@
-import { addComponent, addEntity, Component, ComponentType, hasComponent } from "bitecs";
+import { addComponent, addEntity, Component, hasComponent } from "bitecs";
 import { preloadFont } from "troika-three-text";
 import {
   $isStringType,
   CameraTool,
+  ObjectMenu,
   CursorRaycastable,
   DestroyAtExtremeDistance,
   FloatyObject,
@@ -30,7 +31,10 @@ import {
   SceneLoader,
   NavMesh,
   SceneRoot,
-  EnvironmentSettings
+  NetworkDebug,
+  WaypointPreview,
+  NetworkedFloatyObject,
+  Billboard
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
@@ -42,7 +46,15 @@ import { inflateImageLoader, ImageLoaderParams } from "../inflators/image-loader
 import { inflateModel, ModelParams } from "../inflators/model";
 import { inflateSlice9 } from "../inflators/slice9";
 import { inflateText } from "../inflators/text";
-import { inflateEnvironmentSettings } from "../inflators/environment-settings";
+import {
+  BackgroundParams,
+  EnvironmentSettingsParams,
+  FogParams,
+  inflateBackground,
+  inflateEnvironmentSettings,
+  inflateFog
+} from "../inflators/environment-settings";
+import { inflateSpawnpoint, inflateWaypoint, WaypointParams } from "../inflators/waypoint";
 import { inflateReflectionProbe, ReflectionProbeParams } from "../inflators/reflection-probe";
 import { HubsWorld } from "../app";
 import { Group, Object3D, Texture, VideoTexture } from "three";
@@ -51,6 +63,8 @@ import { MediaLoaderParams } from "../inflators/media-loader";
 import { preload } from "./preload";
 import { DirectionalLightParams, inflateDirectionalLight } from "../inflators/directional-light";
 import { ProjectionMode } from "./projection-mode";
+import { inflateSkybox, SkyboxParams } from "../inflators/skybox";
+import { inflateSpawner, SpawnerParams } from "../inflators/spawner";
 
 preload(
   new Promise(resolve => {
@@ -65,12 +79,12 @@ const reservedAttrs = ["position", "rotation", "scale", "visible", "name", "laye
 
 export class Ref {
   current: number | null;
-  constructor() {
-    this.current = null;
+  constructor(value: number | null) {
+    this.current = value;
   }
 }
-export function createRef() {
-  return new Ref();
+export function createRef(value: number | null = null) {
+  return new Ref(value);
 }
 
 export function resolveRef(world: HubsWorld, ref: Ref) {
@@ -80,8 +94,8 @@ export function resolveRef(world: HubsWorld, ref: Ref) {
   return ref.current;
 }
 
-type ArrayVec3 = [x: number, y: number, z: number];
-type Attrs = {
+export type ArrayVec3 = [x: number, y: number, z: number];
+export type Attrs = {
   position?: ArrayVec3;
   rotation?: ArrayVec3;
   scale?: ArrayVec3;
@@ -196,12 +210,14 @@ interface InflatorFn {
 export interface ComponentData {
   directionalLight?: DirectionalLightParams;
   grabbable?: GrabbableParams;
+  billboard?: { onlyY: boolean };
 }
 
 export interface JSXComponentData extends ComponentData {
   slice9?: {
     size: [width: number, height: number];
     insets: [top: number, buttom: number, left: number, right: number];
+    texture: Texture;
   };
   image?: {
     texture: Texture;
@@ -245,7 +261,24 @@ export interface JSXComponentData extends ComponentData {
   rigidbody?: any;
   physicsShape?: any;
   floatyObject?: any;
+  networkedFloatyObject?: any;
   networkedTransform?: any;
+  objectMenu?: {
+    pinButtonRef: Ref;
+    unpinButtonRef: Ref;
+    cameraFocusButtonRef: Ref;
+    cameraTrackButtonRef: Ref;
+    removeButtonRef: Ref;
+    dropButtonRef: Ref;
+    inspectButtonRef: Ref;
+    deserializeDrawingButtonRef: Ref;
+    openLinkButtonRef: Ref;
+    refreshButtonRef: Ref;
+    cloneButtonRef: Ref;
+    rotateButtonRef: Ref;
+    mirrorButtonRef: Ref;
+    scaleButtonRef: Ref;
+  };
   cameraTool?: {
     snapMenuRef: Ref;
     nextButtonRef: Ref;
@@ -268,14 +301,24 @@ export interface JSXComponentData extends ComponentData {
   object3D?: any;
   text?: any;
   model?: ModelParams;
+  networkDebug?: boolean;
+  waypointPreview?: boolean;
 }
 
 export interface GLTFComponentData extends ComponentData {
   video?: VideoLoaderParams;
   image?: ImageLoaderParams;
-  environmentSettings?: any;
+  environmentSettings?: EnvironmentSettingsParams;
   reflectionProbe?: ReflectionProbeParams;
-  navMesh?: boolean;
+  navMesh?: true;
+  waypoint?: WaypointParams;
+  spawner: SpawnerParams;
+
+  // deprecated
+  spawnPoint?: true;
+  skybox: SkyboxParams;
+  fog: FogParams;
+  background: BackgroundParams;
 }
 
 declare global {
@@ -295,6 +338,7 @@ declare global {
 
 export const commonInflators: Required<{ [K in keyof ComponentData]: InflatorFn }> = {
   grabbable: inflateGrabbable,
+  billboard: createDefaultInflator(Billboard),
 
   // inflators that create Object3Ds
   directionalLight: inflateDirectionalLight
@@ -317,10 +361,12 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   rigidbody: createDefaultInflator(Rigidbody),
   physicsShape: createDefaultInflator(PhysicsShape),
   floatyObject: createDefaultInflator(FloatyObject),
+  networkedFloatyObject: createDefaultInflator(NetworkedFloatyObject),
   makeKinematicOnRelease: createDefaultInflator(MakeKinematicOnRelease),
   destroyAtExtremeDistance: createDefaultInflator(DestroyAtExtremeDistance),
   networkedTransform: createDefaultInflator(NetworkedTransform),
   networked: createDefaultInflator(Networked),
+  objectMenu: createDefaultInflator(ObjectMenu),
   cameraTool: createDefaultInflator(CameraTool, { captureDurIdx: 1 }),
   animationMixer: createDefaultInflator(AnimationMixer),
   networkedVideo: createDefaultInflator(NetworkedVideo),
@@ -328,6 +374,8 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   videoMenuItem: createDefaultInflator(VideoMenuItem),
   sceneRoot: createDefaultInflator(SceneRoot),
   sceneLoader: createDefaultInflator(SceneLoader),
+  networkDebug: createDefaultInflator(NetworkDebug),
+  waypointPreview: createDefaultInflator(WaypointPreview),
   mediaLoader: inflateMediaLoader,
 
   // inflators that create Object3Ds
@@ -346,7 +394,13 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   image: inflateImageLoader,
   reflectionProbe: inflateReflectionProbe,
   navMesh: createDefaultInflator(NavMesh),
-  environmentSettings: inflateEnvironmentSettings
+  waypoint: inflateWaypoint,
+  environmentSettings: inflateEnvironmentSettings,
+  fog: inflateFog,
+  background: inflateBackground,
+  spawnPoint: inflateSpawnpoint,
+  skybox: inflateSkybox,
+  spawner: inflateSpawner
 };
 
 function jsxInflatorExists(name: string): name is keyof JSXComponentData {
