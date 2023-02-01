@@ -7,14 +7,55 @@
   grid-template-columns:
     [main] auto
     [sidebar] minmax(0, min-content);
-  
-  grid-template-rows: 
+
+  grid-template-rows:
     [viewport] auto
     [toolbar] min-content;
 
   overflow: hidden;
   position: relative;
   pointer-events: none;
+}
+// this is the show the button
+:local(.video-streaming-overlay) {
+  grid-column: main;
+  grid-row: viewport;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+:local(.is-video-streaming) {
+  position: absolute;
+  top: 20px;
+  left: 60px;
+  background: red;
+
+  height: 40px;
+  width: 50px;
+
+  button {
+    border-radius: 15px;
+    padding: 4px;
+  }
+  @media (max-width: theme.$breakpoint-sm - 1), (max-height: theme.$breakpoint-vr - 1) {
+    top: 60px;
+    font-size: 10px;
+  }
+}
+:local(.is-split-screen) {
+  @media (max-width: theme.$breakpoint-sm - 1), (max-height: theme.$breakpoint-vr - 1) {
+    position: absolute;
+    top: 280px !important;
+    left: 60px !important;
+  }
+}
+:local(.streamingButton) {
+  position: absolute;
+  top: 50px;
+  left: 30px;
 }
 
 :local(.main) {
@@ -27,7 +68,7 @@
   overflow: hidden;
   width: 450px;
 
-  @media(max-width: theme.$breakpoint-lg - 1), (max-height: theme.$breakpoint-vr - 1) {
+  @media (max-width: theme.$breakpoint-lg - 1), (max-height: theme.$breakpoint-vr - 1) {
     position: fixed;
     top: 0;
     left: 0;
@@ -50,7 +91,64 @@
     pointer-events: auto;
   }
 }
+:local(.viewport-split) {
+  position: relative;
+  grid-row-start: viewport;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 67%;
+  width: 100%;
+  & > * {
+    pointer-events: auto;
+  }
+  @media (max-width: theme.$breakpoint-sm - 1), (max-height: theme.$breakpoint-vr - 1) {
+    flex-direction: row-reverse;
+    height: 100%;
+  }
+}
 
+:local(.people-count) {
+  height: 20px;
+  position: absolute;
+  bottom: 120px;
+  margin: auto;
+  left: 10px;
+  width: 80px;
+  background: white;
+  border: 2px solid greenyellow;
+  border-radius: 12px;
+  color: black;
+  display: flex;
+  justify-content: center;
+  align-self: center;
+  text-align: center;
+}
+
+:local(.video-streaming-box) {
+  height: 30%;
+  position: absolute;
+  bottom: 10px;
+  left: calc(34%);
+  right: calc(34%);
+  width: 25%;
+  background: black;
+
+  @media (max-width: theme.$breakpoint-sm - 1), (max-height: theme.$breakpoint-vr - 1) {
+    height: 250px;
+    bottom: auto;
+    top: 0px;
+
+    left: calc(50% - 212.5px);
+    right: calc(50% - 212.5px);
+    width: 425px;
+  }
+}
+
+:local(.videoStreamingFrame) {
+  height: 100%;
+  width: 100%;
+}
 :local(.toolbar) {
   grid-row-start: toolbar;
   grid-column-end: -1;
@@ -81,7 +179,7 @@
 }
 
 :local(.object-focused) {
-  @media(max-width: theme.$breakpoint-lg - 1), (max-height: theme.$breakpoint-vr - 1) {
+  @media (max-width: theme.$breakpoint-lg - 1), (max-height: theme.$breakpoint-vr - 1) {
     :local(.toolbar) {
       display: none;
     }

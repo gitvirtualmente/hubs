@@ -662,20 +662,20 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     updateUIForHub(hub, hubChannel);
     scene.emit("hub_updated", { hub });
 
-    if (!isEmbed) {
-      console.log("Page is not embedded so environment initialization will start immediately");
-      loadEnvironmentAndConnect();
-    } else {
-      console.log("Page is embedded so environment initialization will be deferred");
-      remountUI({
-        onPreloadLoadClicked: () => {
-          console.log("Preload has been activated");
-          hubChannel.allowNAFTraffic(true);
-          remountUI({ showPreload: false });
-          loadEnvironmentAndConnect();
-        }
-      });
-    }
+    // if (!isEmbed) {
+    console.log("Page is not embedded so environment initialization will start immediately");
+    loadEnvironmentAndConnect();
+    // } else {
+    //   console.log("Page is embedded so environment initialization will be deferred");
+    //   remountUI({
+    //     onPreloadLoadClicked: () => {
+    //       console.log("Preload has been activated");
+    //       hubChannel.allowNAFTraffic(true);
+    //       remountUI({ showPreload: false });
+    //       loadEnvironmentAndConnect();
+    // }
+    // });
+    // }
   })();
 }
 
@@ -1160,6 +1160,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       roles: meta.roles,
       permissions: meta.permissions,
       streaming: meta.streaming,
+      // videoStreaming: meta.videoStreaming,
       recording: meta.recording,
       hand_raised: meta.hand_raised,
       typing: meta.typing
@@ -1223,12 +1224,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
   events.on(`hub:change`, ({ key, current }) => {
+    // alert("in event" + current.videoStreaming);
     scene.emit("presence_updated", {
       sessionId: key,
       profile: current.profile,
       roles: current.roles,
       permissions: current.permissions,
       streaming: current.streaming,
+      // videoStreaming: current.videoStreaming,
       recording: current.recording,
       hand_raised: current.hand_raised,
       typing: current.typing

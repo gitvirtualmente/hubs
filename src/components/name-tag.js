@@ -45,6 +45,7 @@ AFRAME.registerComponent("name-tag", {
     this.isTyping = false;
     this.isOwner = false;
     this.isRecording = false;
+    this.isVideoRecording = false;
     this.isHandRaised = false;
     this.volumeAvg = new MovingAverage(128);
     this.shouldBeVisible = true;
@@ -200,6 +201,7 @@ AFRAME.registerComponent("name-tag", {
     this.displayName = presenceMeta.profile.displayName;
     this.identityName = presenceMeta.profile.identityName;
     this.isRecording = !!(presenceMeta.streaming || presenceMeta.recording);
+    this.isVideoRecording = !!presenceMeta.presenceMetaVideoStreaming;
     this.isOwner = !!(presenceMeta.roles && presenceMeta.roles.owner);
     this.isTyping = !!presenceMeta.typing;
     this.isHandRaised = !!presenceMeta.hand_raised;

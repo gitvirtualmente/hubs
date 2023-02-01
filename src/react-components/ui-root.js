@@ -95,6 +95,8 @@ import { SpectatingLabel } from "./room/SpectatingLabel";
 import { SignInMessages } from "./auth/SignInModal";
 import { MediaDevicesEvents } from "../utils/media-devices-utils";
 import { TERMS, PRIVACY } from "../constants";
+import { getCurrentHubId } from "../utils/hub-utils";
+import axios from "axios";
 import { ECSDebugSidebarContainer } from "./debug-panel/ECSSidebar";
 import { NotificationsContainer } from "./room/NotificationsContainer";
 import { usePermissions } from "./room/usePermissions";
@@ -177,7 +179,10 @@ class UIRoot extends Component {
     linkCode: null,
     linkCodeCancel: null,
     miniInviteActivated: false,
-
+    isVideoStreaming: true, //setting it true by default at the start
+    videoStreamingUrl: "", // this is the src used in iframe
+    isSplitScreen: false,
+    eventPopulation: 0,
     didConnectToNetworkedScene: false,
     noMoreLoadingUpdates: false,
     hideLoader: false,
@@ -278,8 +283,55 @@ class UIRoot extends Component {
 
     if (this.state.presenceCount != this.occupantCount()) {
       this.setState({ presenceCount: this.occupantCount() });
+      // axios.post("https://rhy-load.vercel.app/update/633c7fc2bfc5c8031d60ceb1", {
+      //   participants: this.occupantCount()
+      // });
+      const hubId = getCurrentHubId();
+      console.log(`Hub ID to send to the server: ${hubId}`);
+
+      axios.get(
+        // venue/[hubid]/[participantCount]
+        "https://rhy-load.vercel.app/api/v2/venue/" + hubId + "/" + this.occupantCount().toString()
+      );
+      axios
+        .get(
+          // venue/[hubid]/[participantCount]
+          "https://rhy-load.vercel.app/api/v2/venue/" + hubId + "/streaming"
+        )
+        .then(response => {
+          console.log(response.data);
+          if (response.data) {
+            this.onStreamingShow(true);
+            axios
+              .get(
+                // venue/[hubid]/[participantCount]
+                "https://rhy-load.vercel.app/api/v2/venue/" + hubId + "/streaming-url"
+              )
+              .then(response => {
+                console.log(response.data);
+                this.setState({ videoStreamingUrl: response.data });
+              });
+          } else {
+            this.onStreamingShow(false);
+          }
+        })
+        .catch(error => {
+          console.log(error);
+          this.onStreamingShow(false);
+          // this.onStreamingShow(true);
+        });
     }
   }
+
+  onStreamingShow = value => {
+    this.setState({ isVideoStreaming: value });
+    console.log("----------------");
+    console.log(this.state.isVideoStreaming);
+  };
+
+  onSplitScreen = () => {
+    this.setState({ isSplitScreen: !this.state.isSplitScreen });
+  };
 
   onConcurrentLoad = () => {
     if (qsTruthy("allow_multi") || this.props.store.state.preferences.allowMultipleHubsInstances) return;
@@ -973,6 +1025,13 @@ class UIRoot extends Component {
       return (
         <div className={classNames(rootStyles)}>
           <RoomLayoutContainer
+            entered={this.state.entered}
+            isVideoStreaming={this.state.isVideoStreaming}
+            videoStreamingUrl={this.state.videoStreamingUrl}
+            onStreamingShow={this.onStreamingShow}
+            eventPopulation={this.state.eventPopulation}
+            isSplitScreen={this.state.isSplitScreen}
+            onSplitScreen={this.onSplitScreen}
             scene={this.props.scene}
             store={this.props.store}
             viewport={!this.state.hideUITip && <FullscreenTip onDismiss={() => this.setState({ hideUITip: true })} />}
@@ -984,12 +1043,24 @@ class UIRoot extends Component {
     if (this.props.showSafariMicDialog) {
       return (
         <div className={classNames(rootStyles)}>
-          <RoomLayoutContainer scene={this.props.scene} store={this.props.store} modal={<SafariMicModal />} />
+          <RoomLayoutContainer
+            entered={this.state.entered}
+            isVideoStreaming={this.state.isVideoStreaming}
+            videoStreamingUrl={this.state.videoStreamingUrl}
+            onStreamingShow={this.onStreamingShow}
+            eventPopulation={this.state.eventPopulation}
+            isSplitScreen={this.state.isSplitScreen}
+            onSplitScreen={this.onSplitScreen}
+            scene={this.props.scene}
+            store={this.props.store}
+            modal={<SafariMicModal />}
+          />
         </div>
       );
     }
 
-    const preload = this.props.showPreload;
+    // const preload = this.props.showPreload;
+    const preload = false;
 
     const isLoading = !preload && !this.state.hideLoader;
 
@@ -1372,6 +1443,13 @@ class UIRoot extends Component {
             )}
             {this.props.hub && (
               <RoomLayoutContainer
+                entered={this.state.entered}
+                isVideoStreaming={this.state.isVideoStreaming}
+                videoStreamingUrl={this.state.videoStreamingUrl}
+                onStreamingShow={this.onStreamingShow}
+                eventPopulation={this.state.eventPopulation}
+                isSplitScreen={this.state.isSplitScreen}
+                onSplitScreen={this.onSplitScreen}
                 scene={this.props.scene}
                 store={this.props.store}
                 objectFocused={!!this.props.selectedObject}
@@ -1562,12 +1640,25 @@ class UIRoot extends Component {
                 }
                 modal={this.state.dialog}
                 toolbarLeft={
-                  <InvitePopoverContainer
-                    hub={this.props.hub}
-                    hubChannel={this.props.hubChannel}
-                    scene={this.props.scene}
-                    store={this.props.store}
-                  />
+                  <>
+                    {/* <button
+                      onClick={() => this.onStreamingShow()}
+                      className={classNames(
+                        styles.streamingButton
+                        // { [styles.streaming]: this.isVideoStreaming }
+                      )}
+                    >
+                      <FormattedMessage id="room.video-streaming-button" defaultMessage="Stream" />
+                    </button> */}
+                    {/* {!this.state.eventPopulation && this.state.eventPopulation?.toString()} */}
+
+                    <InvitePopoverContainer
+                      hub={this.props.hub}
+                      hubChannel={this.props.hubChannel}
+                      scene={this.props.scene}
+                      store={this.props.store}
+                    />
+                  </>
                 }
                 toolbarCenter={
                   <>
